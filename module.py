@@ -15,6 +15,7 @@ from components.discriminator import MunitDiscriminator, disc_hinge_loss
 from monai.networks.nets import UNet
 from sklearn.metrics import normalized_mutual_info_score
 
+from components.network import ResnetGenerator
 from helpers.utils import mutual_information, LambdaLR, weights_init_normal
 
 
@@ -23,30 +24,8 @@ class CycleGAN(L.LightningModule):
         super().__init__()
         self.automatic_optimization = False
 
-        self.generatorBtoA = nn.Sequential(
-            UNet(
-                spatial_dims=2,
-                in_channels=1,
-                out_channels=1,
-                channels=[64, 96, 128, 192, 256, 512, 1024],
-                strides=[2, 2, 2, 2, 2, 2],
-                num_res_units=2,
-                act="relu"
-            ),
-            nn.Tanh()
-        ).apply(weights_init_normal)
-        self.generatorAtoB = nn.Sequential(
-            UNet(
-                spatial_dims=2,
-                in_channels=1,
-                out_channels=1,
-                channels=[64, 96, 128, 192, 256, 512, 1024],
-                strides=[2, 2, 2, 2, 2, 2],
-                num_res_units=2,
-                act="relu"
-            ),
-            nn.Tanh()
-        ).apply(weights_init_normal)
+        self.generatorBtoA = ResnetGenerator().apply(weights_init_normal)
+        self.generatorAtoB = ResnetGenerator().apply(weights_init_normal)
 
         self.discA = MunitDiscriminator()
         self.discB = MunitDiscriminator()

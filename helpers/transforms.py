@@ -3,7 +3,7 @@ from batchgenerators.transforms.color_transforms import BrightnessMultiplicative
     ContrastAugmentationTransform, GammaTransform
 from batchgenerators.transforms.noise_transforms import GaussianNoiseTransform, GaussianBlurTransform
 from batchgenerators.transforms.resample_transforms import SimulateLowResolutionTransform
-from batchgenerators.transforms.spatial_transforms import SpatialTransform, MirrorTransform
+from batchgenerators.transforms.spatial_transforms import SpatialTransform, MirrorTransform, ZoomTransform
 from batchgenerators.transforms.utility_transforms import NumpyToTensor
 
 
@@ -119,21 +119,6 @@ def get_transforms(name="nnunet_default"):
         ]
 
     elif name == "cyclegan":
-        transforms += [SpatialTransform(
-            None,
-            patch_center_dist_from_border=None,
-            do_elastic_deform=False,
-            alpha=(0.0, 200.0),
-            sigma=(9.0, 13.0),
-            do_rotation=True, angle_x=(-0.2617993877991494, 0.2617993877991494), angle_y=(-0.0, 0.0),
-            angle_z=(-0.0, 0.0), p_rot_per_axis=1,
-            do_scale=True, scale=(0.75, 1.25),
-            border_mode_data='constant', border_cval_data=0, order_data=3,
-            border_mode_seg="constant", border_cval_seg=0,
-            order_seg=0, random_crop=False, p_el_per_sample=0.3,
-            p_scale_per_sample=0.3, p_rot_per_sample=0.3,
-            independent_scale_for_each_axis=True
-        )]
         transforms += [
             MirrorTransform((0, 1))
         ]
