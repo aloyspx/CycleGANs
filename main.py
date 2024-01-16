@@ -17,7 +17,7 @@ if __name__ == "__main__":
     trn_dataloader, val_dataloader, tst_dataloader = setup_dataloaders(dataset_h5py='translation_mbrats_cyclegan.h5',
                                                                        A_key='t1',
                                                                        B_key='t2',
-                                                                       batch_size=96,
+                                                                       batch_size=1,
                                                                        num_workers=max(0, os.cpu_count()))
 
     logger = TensorBoardLogger(save_dir='logs/cyclegan_logs', name=cyclegan.__class__.__name__)

@@ -1,6 +1,7 @@
 import os
 
 import h5py
+import matplotlib.pyplot as plt
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 
@@ -66,7 +67,7 @@ class BraTSDataset(Dataset):
         raise IndexError("Contiguous index out of range")
 
 
-def setup_dataloaders(dataset_h5py, A_key, B_key, batch_size, num_workers, train_transform="nnunet_default"):
+def setup_dataloaders(dataset_h5py, A_key, B_key, batch_size, num_workers, train_transform="cyclegan"):
 
     cases = list(h5py.File(dataset_h5py).keys())
     np.random.shuffle(cases)
@@ -100,12 +101,14 @@ def setup_dataloaders(dataset_h5py, A_key, B_key, batch_size, num_workers, train
 
 if __name__ == "__main__":
     trn_dataloader, val_dataloader, tst_dataloader = setup_dataloaders(
-        dataset_h5py="translation_mbrats_cyclegan.h5",
+        dataset_h5py="../translation_mbrats_cyclegan.h5",
         A_key='t1', B_key='t2', batch_size=1, num_workers=os.cpu_count())
 
     import time
 
     start = time.time()
     for elem in trn_dataloader:
-        pass
+        if np.random.random() < 0.1:
+            plt.imshow(elem['A'][0][0], cmap="gray")
+            plt.show()
     print(f"{time.time() - start} seconds")

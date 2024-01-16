@@ -207,10 +207,10 @@ class CycleGAN(L.LightningModule):
 
     def configure_optimizers(self):
         gen_parameters = list(self.generatorAtoB.parameters()) + list(self.generatorBtoA.parameters())
-        gen_optimizer = optim.Adam(gen_parameters, lr=1e-4, betas=(0.5, 0.999))
+        gen_optimizer = optim.Adam(gen_parameters, lr=2e-4, betas=(0.5, 0.999))
 
         dsc_parameters = list(self.discA.parameters()) + list(self.discB.parameters())
-        dsc_optimizer = optim.Adam(dsc_parameters, lr=1e-4, betas=(0.5, 0.999))
+        dsc_optimizer = optim.Adam(dsc_parameters, lr=2e-4, betas=(0.5, 0.999))
 
         # Scheduler
         gen_scheduler = optim.lr_scheduler.LambdaLR(
