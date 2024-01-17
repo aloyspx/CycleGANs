@@ -3,7 +3,7 @@ import os
 import numpy as np
 from torch import optim, nn
 import torch.nn.functional as F
-import lightning as L
+import pytorch_lightning as L
 import matplotlib.pyplot as plt
 
 from components.discriminator import MunitDiscriminator, disc_hinge_loss

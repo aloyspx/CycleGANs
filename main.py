@@ -1,10 +1,10 @@
 import argparse
 import os
 
-import lightning as pl
+import pytorch_lightning as pl
 import torch
-from lightning.pytorch.callbacks import ModelCheckpoint
-from lightning.pytorch.loggers import TensorBoardLogger
+from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.loggers import TensorBoardLogger
 
 from helpers.dataset import setup_dataloaders
 from module import CycleGAN
@@ -41,7 +41,7 @@ if __name__ == "__main__":
             every_n_epochs=5,
             filename='{epoch}',
             save_last=True,
-            save_top_k = -1
+            save_top_k=-1
         ),
     ]
 
