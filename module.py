@@ -1,19 +1,12 @@
 import os
-from typing import Any
 
 import numpy as np
-import sklearn.metrics
-from lightning.pytorch.utilities.types import STEP_OUTPUT
-from monai.networks.layers import Act
 from torch import optim, nn
 import torch.nn.functional as F
 import lightning as L
 import matplotlib.pyplot as plt
-from torchmetrics.image.fid import FrechetInceptionDistance
 
 from components.discriminator import MunitDiscriminator, disc_hinge_loss
-from monai.networks.nets import UNet
-from sklearn.metrics import normalized_mutual_info_score
 
 from components.network import ResnetGenerator
 from helpers.utils import mutual_information, LambdaLR, weights_init_normal
@@ -169,8 +162,8 @@ class CycleGAN(L.LightningModule):
             axs[1, 2].axis('off')
             axs[1, 2].set_title('A_idt')
 
-            os.makedirs('logs/samples/', exist_ok=True)
-            plt.savefig(f'logs/samples/fig_{self.current_epoch}_{batch_idx}')
+            os.makedirs(f'{self.logger.experiment.log_dir}/samples/', exist_ok=True)
+            plt.savefig(f'{self.logger.experiment.log_dir}/samples/fig_{self.current_epoch}_{batch_idx}')
             plt.close('all')
 
     def on_validation_epoch_end(self):
