@@ -18,8 +18,8 @@ class CycleGAN(L.LightningModule):
         super().__init__()
         self.automatic_optimization = False
 
-        self.generatorBtoA = ResnetGenerator().apply(weights_init_normal)
-        self.generatorAtoB = ResnetGenerator().apply(weights_init_normal)
+        self.generatorBtoA = ResnetGenerator(n_blocks=6).apply(weights_init_normal)
+        self.generatorAtoB = ResnetGenerator(n_blocks=6).apply(weights_init_normal)
 
         self.discA = NLayerDiscriminator().apply(weights_init_normal)
         self.discB = NLayerDiscriminator().apply(weights_init_normal)
@@ -138,37 +138,38 @@ class CycleGAN(L.LightningModule):
         self.mi_B.append(mutual_information(A.flatten().cpu().numpy(), A_hat.flatten().cpu().numpy()))
 
         """Sample logging"""
-        if batch_idx % 10 == 0:
-            plt.figure(figsize=(16, 16))
-            fig, axs = plt.subplots(2, 3)
+        if np.random.random() < 0.1:
+            for i in range(batch['A'].shape[2]):
+                plt.figure(figsize=(16, 16))
+                fig, axs = plt.subplots(2, 3)
 
-            axs[0, 0].imshow(batch['A'].cpu().numpy()[0][0], cmap="gray")
-            axs[0, 0].axis('off')
-            axs[0, 0].set_title('A')
+                axs[0, 0].imshow(batch['A'].cpu().numpy()[0][0][i], cmap="gray")
+                axs[0, 0].axis('off')
+                axs[0, 0].set_title('A')
 
-            axs[0, 1].imshow(B_hat.cpu().numpy()[0][0], cmap="gray")
-            axs[0, 1].axis('off')
-            axs[0, 1].set_title('B_hat')
+                axs[0, 1].imshow(B_hat.cpu().numpy()[0][0][i], cmap="gray")
+                axs[0, 1].axis('off')
+                axs[0, 1].set_title('B_hat')
 
-            axs[0, 2].imshow(B_idt.cpu().numpy()[0][0], cmap="gray")
-            axs[0, 2].axis('off')
-            axs[0, 2].set_title('B_idt')
+                axs[0, 2].imshow(B_idt.cpu().numpy()[0][0][i], cmap="gray")
+                axs[0, 2].axis('off')
+                axs[0, 2].set_title('B_idt')
 
-            axs[1, 0].imshow(batch['B'].cpu().numpy()[0][0], cmap="gray")
-            axs[1, 0].axis('off')
-            axs[1, 0].set_title('B')
+                axs[1, 0].imshow(batch['B'].cpu().numpy()[0][0][i], cmap="gray")
+                axs[1, 0].axis('off')
+                axs[1, 0].set_title('B')
 
-            axs[1, 1].imshow(A_hat.cpu().numpy()[0][0], cmap="gray")
-            axs[1, 1].axis('off')
-            axs[1, 1].set_title('A_hat')
+                axs[1, 1].imshow(A_hat.cpu().numpy()[0][0][i], cmap="gray")
+                axs[1, 1].axis('off')
+                axs[1, 1].set_title('A_hat')
 
-            axs[1, 2].imshow(A_idt.cpu().numpy()[0][0], cmap="gray")
-            axs[1, 2].axis('off')
-            axs[1, 2].set_title('A_idt')
+                axs[1, 2].imshow(A_idt.cpu().numpy()[0][0][i], cmap="gray")
+                axs[1, 2].axis('off')
+                axs[1, 2].set_title('A_idt')
 
-            os.makedirs('logs/samples/', exist_ok=True)
-            plt.savefig(f'logs/samples/fig_{self.current_epoch}_{batch_idx}')
-            plt.close('all')
+                os.makedirs('logs/samples/', exist_ok=True)
+                plt.savefig(f'logs/samples/fig_{self.current_epoch}_{batch_idx}_{i}')
+                plt.close('all')
 
     def on_validation_epoch_end(self):
         mi_A_score, mi_B_score = np.average(self.mi_A), np.average(self.mi_B)
