@@ -134,7 +134,7 @@ class CycleGAN(L.LightningModule):
         self.mi_B.append(mutual_information(A.flatten().cpu().numpy(), A_hat.flatten().cpu().numpy()))
 
         """Sample logging"""
-        if np.random.random() < 0.1 or True:
+        if np.random.random() < 0.1:
             for i in range(batch['A'].shape[2]):
                 plt.figure(figsize=(16, 16))
                 fig, axs = plt.subplots(2, 3)
