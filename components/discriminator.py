@@ -69,7 +69,7 @@ class SpectralNorm(nn.Module):
 
 class MunitDiscriminatorConvBlock(nn.Module):
     """
-    source: https://github.com/NVlabs/MUNIT/blob/a99d853ab2d5fda837395c821a7a65d46afdebb4/networks.py
+    source: https://github.com/NVlabs/MUNIT/blob/a99d853ab3d5fda837395c821a7a65d46afdebb4/networks.py
     """
 
     def __init__(self, input_dim, output_dim, kernel_size, stride,
@@ -78,11 +78,11 @@ class MunitDiscriminatorConvBlock(nn.Module):
         self.use_bias = True
         # initialize padding
         if pad_type == 'reflect':
-            self.pad = nn.ReflectionPad2d(padding)
+            self.pad = nn.ReflectionPad3d(padding)
         elif pad_type == 'replicate':
-            self.pad = nn.ReplicationPad2d(padding)
+            self.pad = nn.ReplicationPad3d(padding)
         elif pad_type == 'zero':
-            self.pad = nn.ZeroPad2d(padding)
+            self.pad = nn.ZeroPad3d(padding)
         else:
             assert 0, "Unsupported padding type: {}".format(pad_type)
 
@@ -103,9 +103,9 @@ class MunitDiscriminatorConvBlock(nn.Module):
         # initialize convolution
         self.norm = None
         if norm == 'sn':
-            self.conv = SpectralNorm(nn.Conv2d(input_dim, output_dim, kernel_size, stride, bias=self.use_bias))
+            self.conv = SpectralNorm(nn.Conv3d(input_dim, output_dim, kernel_size, stride, bias=self.use_bias))
         else:
-            self.conv = nn.Conv2d(input_dim, output_dim, kernel_size, stride, bias=self.use_bias)
+            self.conv = nn.Conv3d(input_dim, output_dim, kernel_size, stride, bias=self.use_bias)
 
     def forward(self, x):
         x = self.conv(self.pad(x))
@@ -118,7 +118,7 @@ class MunitDiscriminatorConvBlock(nn.Module):
 
 class MunitDiscriminator(nn.Module):
     """
-    source: https://github.com/NVlabs/MUNIT/blob/a99d853ab2d5fda837395c821a7a65d46afdebb4/networks.py
+    source: https://github.com/NVlabs/MUNIT/blob/a99d853ab3d5fda837395c821a7a65d46afdebb4/networks.py
     """
 
     def __init__(self,
@@ -139,7 +139,7 @@ class MunitDiscriminator(nn.Module):
         self.pad_type = pad_type
 
         super(MunitDiscriminator, self).__init__()
-        self.downsample = nn.AvgPool2d(3, stride=2, padding=1, count_include_pad=False)
+        self.downsample = nn.AvgPool3d(3, stride=2, padding=1, count_include_pad=False)
         self.cnns = nn.ModuleList()
         for _ in range(self.num_scales):
             self.cnns.append(self._make_net())
@@ -153,7 +153,7 @@ class MunitDiscriminator(nn.Module):
             cnn_x += [MunitDiscriminatorConvBlock(dim, dim * 2, 4, 2, 1, norm=self.norm, activation=self.activ,
                                                   pad_type=self.pad_type)]
             dim *= 2
-        cnn_x += [nn.Conv2d(dim, 1, 1, 1, 0)]
+        cnn_x += [nn.Conv3d(dim, 1, 1, 1, 0)]
         cnn_x = nn.Sequential(*cnn_x)
         return cnn_x
 
