@@ -14,6 +14,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source_modality", required=True)
     parser.add_argument("--target_modality", required=True)
+    parser.add_argument("--data_source", required=True)
     return parser.parse_args()
 
 
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     args = parse_args()
 
     cyclegan = CycleGAN()
-    trn_dataloader, val_dataloader, tst_dataloader = setup_dataloaders(dataset_h5py='translation_mbrats_cyclegan.h5',
+    trn_dataloader, val_dataloader, tst_dataloader = setup_dataloaders(dataset_h5py=args.data_source,
                                                                        A_key=args.source_modality,
                                                                        B_key=args.target_modality,
                                                                        batch_size=8,
@@ -49,8 +50,6 @@ if __name__ == "__main__":
                          max_epochs=200,
                          callbacks=callbacks,
                          logger=logger,
-                         limit_train_batches=10,
-                         limit_val_batches=10
                          )
     trainer.fit(model=cyclegan,
                 train_dataloaders=trn_dataloader,
