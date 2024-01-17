@@ -2,19 +2,13 @@ import os
 from typing import Any
 
 import numpy as np
-import sklearn.metrics
-from lightning.pytorch.utilities.types import STEP_OUTPUT
-from monai.networks.layers import Act
+import torch
 from torch import optim, nn
 import torch.nn.functional as F
 import lightning as L
 import matplotlib.pyplot as plt
-from torchmetrics.image.fid import FrechetInceptionDistance
 
-from components.discriminator import MunitDiscriminator, disc_hinge_loss
-from monai.networks.nets import UNet
-from sklearn.metrics import normalized_mutual_info_score
-
+from components.discriminator import NLayerDiscriminator
 from components.network import ResnetGenerator
 from helpers.utils import mutual_information, LambdaLR, weights_init_normal
 
@@ -27,8 +21,8 @@ class CycleGAN(L.LightningModule):
         self.generatorBtoA = ResnetGenerator().apply(weights_init_normal)
         self.generatorAtoB = ResnetGenerator().apply(weights_init_normal)
 
-        self.discA = MunitDiscriminator()
-        self.discB = MunitDiscriminator()
+        self.discA = NLayerDiscriminator().apply(weights_init_normal)
+        self.discB = NLayerDiscriminator().apply(weights_init_normal)
 
         self.lambda_cyc = 10
         self.lambda_idt = 5
@@ -38,7 +32,10 @@ class CycleGAN(L.LightningModule):
         self.mi_B = []
 
     def disc_loss(self, disc_out, disc_update, real):
-        return disc_hinge_loss(disc_out, disc_update, real)
+        if real:
+            return F.binary_cross_entropy_with_logits(disc_out, torch.ones(disc_out.shape).to(self.device))
+        else:
+            return F.binary_cross_entropy_with_logits(disc_out, torch.zeros(disc_out.shape).to(self.device))
 
     def training_step_generators(self, batch):
         gen_optimzer, _ = self.optimizers()
