@@ -1,5 +1,6 @@
 import functools
 
+import torch.nn.functional
 from torch import nn
 
 
@@ -62,13 +63,15 @@ class ResnetBlock(nn.Module):
         out = x + self.conv_block(x)  # add skip connections
         return out
 
+
 class ResnetGenerator(nn.Module):
     """Resnet-based generator that consists of Resnet blocks between a few downsampling/upsampling operations.
 
     We adapt Torch code and idea from Justin Johnson's neural style transfer project(https://github.com/jcjohnson/fast-neural-style)
     """
 
-    def __init__(self, input_nc=1, output_nc=1, ngf=64, norm_layer=nn.InstanceNorm2d, use_dropout=False, n_blocks=9, padding_type='reflect'):
+    def __init__(self, input_nc=1, output_nc=1, ngf=64, norm_layer=nn.InstanceNorm2d, use_dropout=False, n_blocks=9,
+                 padding_type='reflect'):
         """Construct a Resnet-based generator
 
         Parameters:
@@ -80,7 +83,7 @@ class ResnetGenerator(nn.Module):
             n_blocks (int)      -- the number of ResNet blocks
             padding_type (str)  -- the name of padding layer in conv layers: reflect | replicate | zero
         """
-        assert(n_blocks >= 0)
+        assert (n_blocks >= 0)
         super(ResnetGenerator, self).__init__()
         if type(norm_layer) == functools.partial:
             use_bias = norm_layer.func == nn.InstanceNorm2d
@@ -100,9 +103,10 @@ class ResnetGenerator(nn.Module):
                       nn.ReLU(True)]
 
         mult = 2 ** n_downsampling
-        for i in range(n_blocks):       # add ResNet blocks
+        for i in range(n_blocks):  # add ResNet blocks
 
-            model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
+            model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout,
+                                  use_bias=use_bias)]
 
         for i in range(n_downsampling):  # add upsampling layers
             mult = 2 ** (n_downsampling - i)
@@ -114,10 +118,11 @@ class ResnetGenerator(nn.Module):
                       nn.ReLU(True)]
         model += [nn.ReflectionPad2d(3)]
         model += [nn.Conv2d(ngf, output_nc, kernel_size=7, padding=0)]
-        model += [nn.Tanh()]
 
         self.model = nn.Sequential(*model)
 
     def forward(self, input):
         """Standard forward"""
-        return self.model(input)
+        out = self.model(input)
+        return {"trs": torch.nn.functional.tanh(out[:, 0:1, ...]),
+                "seg": out[:, 1:, ...]}

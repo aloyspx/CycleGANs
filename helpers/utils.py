@@ -50,6 +50,10 @@ def mutual_information(x, y, sigma=0.05, normalized=True):
     return mi
 
 
+def dice_score(seg, gt):
+    return np.sum(seg[gt == 1]) * 2.0 / (np.sum(seg) + np.sum(gt))
+
+
 class LambdaLR:
     def __init__(self, n_epochs, decay_start_epoch):
         assert (n_epochs - decay_start_epoch) > 0, "Decay must start before the training session ends!"

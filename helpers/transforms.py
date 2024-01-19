@@ -119,6 +119,31 @@ def get_transforms(name="nnunet_default"):
         ]
 
     elif name == "cyclegan":
+
+        transforms += [
+            MirrorTransform((0, 1))
+        ]
+        transforms += [
+            NumpyToTensor(cast_to='float')
+        ]
+
+    elif name == "cyclegan_seg":
+
+        transforms += [SpatialTransform(
+            None,
+            patch_center_dist_from_border=None,
+            do_elastic_deform=False,
+            alpha=(0.0, 200.0),
+            sigma=(9.0, 13.0),
+            do_rotation=True, angle_x=(-0.2617993877991494, 0.2617993877991494), angle_y=(-0.0, 0.0),
+            angle_z=(-0.0, 0.0), p_rot_per_axis=1,
+            do_scale=True, scale=(0.65, 1.6),
+            border_mode_data='constant', border_cval_data=0, order_data=3,
+            border_mode_seg="constant", border_cval_seg=0,
+            order_seg=0, random_crop=False, p_el_per_sample=0.3,
+            p_scale_per_sample=0.3, p_rot_per_sample=0.3,
+            independent_scale_for_each_axis=True
+        )]
         transforms += [
             MirrorTransform((0, 1))
         ]

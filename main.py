@@ -29,8 +29,8 @@ if __name__ == "__main__":
     trn_dataloader, val_dataloader, tst_dataloader = setup_dataloaders(dataset_h5py=args.data_source,
                                                                        A_key=args.source_modality,
                                                                        B_key=args.target_modality,
-                                                                       batch_size=8,
-                                                                       num_workers=max(0, os.cpu_count()))
+                                                                       batch_size=1,
+                                                                       num_workers=min(0, os.cpu_count()))
 
     logger = TensorBoardLogger(save_dir=f'logs/{args.source_modality}-{args.target_modality}',
                                name=cyclegan.__class__.__name__)

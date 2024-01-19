@@ -26,22 +26,32 @@ class BraTSDataset(Dataset):
 
         assert self.counter == t_counter
 
-        self.A_intervals = self.create_volume_intervals([self.dataset[case][self.A_key] for case in subset_keys], subset_keys)
-        self.B_intervals = self.create_volume_intervals([self.dataset[case][self.B_key] for case in subset_keys], subset_keys)
+        self.A_intervals = self.create_volume_intervals([self.dataset[case][self.A_key] for case in subset_keys],
+                                                        subset_keys)
+        self.B_intervals = self.create_volume_intervals([self.dataset[case][self.B_key] for case in subset_keys],
+                                                        subset_keys)
 
     def __len__(self):
         return self.counter
 
     def __getitem__(self, idx):
+        """A"""
         d = self.get_slice_from_contiguous_index(idx, self.dataset, self.A_intervals, self.A_key)
-        A = np.expand_dims(d, axis=[0]).astype(np.float32)
-        A = self.transform(data=A)
+        seg = self.get_slice_from_contiguous_index(idx, self.dataset, self.A_intervals, 'segmentation')
 
+        A = np.expand_dims(d, axis=[0]).astype(np.float32)
+        seg = np.expand_dims(seg, axis=[0]).astype(np.float32)
+        seg[seg != 0] = 1
+
+        A = self.transform(data=A, seg=seg)
+
+        """B"""
         d = self.get_slice_from_contiguous_index(idx, self.dataset, self.B_intervals, self.B_key)
         B = np.expand_dims(d, axis=[0]).astype(np.float32)
+
         B = self.transform(data=B)
 
-        return {"A": np.clip(A['data'][0], -1, 1), "B": np.clip(B['data'][0], -1, 1)}
+        return {"A": np.clip(A['data'][0], -1, 1), "B": np.clip(B['data'][0], -1, 1), "A_seg": A['seg'][0]}
 
     @staticmethod
     def create_volume_intervals(volumes, subset_keys):
@@ -68,7 +78,6 @@ class BraTSDataset(Dataset):
 
 
 def setup_dataloaders(dataset_h5py, A_key, B_key, batch_size, num_workers, train_transform="cyclegan"):
-
     cases = list(h5py.File(dataset_h5py).keys())
     np.random.shuffle(cases)
     tst_cases = cases[:37]
