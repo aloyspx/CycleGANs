@@ -14,7 +14,7 @@ except:
 
 
 class BraTSDataset(Dataset):
-    def __init__(self, dataset_h5py, A_key, B_key, transform_name, subset_keys, n_slices=32):
+    def __init__(self, dataset_h5py, A_key, B_key, transform_name, subset_keys, n_slices=64):
         super().__init__()
         self.n_slices = n_slices
         self.transform = get_transforms(transform_name)

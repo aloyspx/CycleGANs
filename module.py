@@ -3,7 +3,7 @@ import os
 import numpy as np
 from torch import optim, nn
 import torch.nn.functional as F
-import lightning as L
+import pytorch_lightning as L
 import matplotlib.pyplot as plt
 
 from components.discriminator import MunitDiscriminator, disc_hinge_loss
@@ -17,11 +17,11 @@ class CycleGAN(L.LightningModule):
         super().__init__()
         self.automatic_optimization = False
 
-        self.generatorBtoA = ResnetGenerator(n_blocks=6).apply(weights_init_normal)
-        self.generatorAtoB = ResnetGenerator(n_blocks=6).apply(weights_init_normal)
+        self.generatorBtoA = ResnetGenerator(n_blocks=6, ngf=32).apply(weights_init_normal)
+        self.generatorAtoB = ResnetGenerator(n_blocks=6, ngf=32).apply(weights_init_normal)
 
-        self.discA = MunitDiscriminator()
-        self.discB = MunitDiscriminator()
+        self.discA = MunitDiscriminator(dim=32)
+        self.discB = MunitDiscriminator(dim=32)
 
         self.lambda_cyc = 10
         self.lambda_idt = 5
@@ -187,10 +187,10 @@ class CycleGAN(L.LightningModule):
 
         # Scheduler
         gen_scheduler = optim.lr_scheduler.LambdaLR(
-            gen_optimizer, lr_lambda=LambdaLR(200, 100).step
+            gen_optimizer, lr_lambda=LambdaLR(100, 50).step
         )
         dsc_scheduler = optim.lr_scheduler.LambdaLR(
-            dsc_optimizer, lr_lambda=LambdaLR(200, 100).step
+            dsc_optimizer, lr_lambda=LambdaLR(100, 50).step
         )
         return (
             {
