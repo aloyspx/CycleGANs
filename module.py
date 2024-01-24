@@ -17,11 +17,11 @@ class CycleGAN(L.LightningModule):
         super().__init__()
         self.automatic_optimization = False
 
-        self.generatorBtoA = ResnetGenerator(n_blocks=6, ngf=32).apply(weights_init_normal)
-        self.generatorAtoB = ResnetGenerator(n_blocks=6, ngf=32).apply(weights_init_normal)
+        self.generatorBtoA = ResnetGenerator().apply(weights_init_normal)
+        self.generatorAtoB = ResnetGenerator().apply(weights_init_normal)
 
-        self.discA = MunitDiscriminator(dim=32)
-        self.discB = MunitDiscriminator(dim=32)
+        self.discA = MunitDiscriminator()
+        self.discB = MunitDiscriminator()
 
         self.lambda_cyc = 10
         self.lambda_idt = 5

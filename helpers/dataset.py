@@ -14,7 +14,7 @@ except:
 
 
 class BraTSDataset(Dataset):
-    def __init__(self, dataset_h5py, A_key, B_key, transform_name, subset_keys, n_slices=64):
+    def __init__(self, dataset_h5py, A_key, B_key, transform_name, subset_keys, n_slices=64, patch_size=128):
         super().__init__()
         self.n_slices = n_slices
         self.transform = get_transforms(transform_name)
@@ -22,15 +22,29 @@ class BraTSDataset(Dataset):
         self.A_key = A_key
         self.B_key = B_key
 
-        self.A_intervals = self.create_volume_intervals([self.dataset[case][self.A_key] for case in subset_keys], subset_keys)
-        self.B_intervals = self.create_volume_intervals([self.dataset[case][self.B_key] for case in subset_keys], subset_keys)
+        self.A_intervals = self.create_volume_intervals([self.dataset[case][self.A_key] for case in subset_keys],
+                                                        subset_keys)
+        self.B_intervals = self.create_volume_intervals([self.dataset[case][self.B_key] for case in subset_keys],
+                                                        subset_keys)
+
+        self.patch_size = [patch_size, patch_size]
 
     def __getitem__(self, idx):
+
         d = self.get_slice_from_contiguous_index(idx, self.dataset, self.A_intervals, self.A_key)[:, 0, :, :]
+
+        start_x = np.random.randint(0, d.shape[-2] - self.patch_size[0])
+        start_y = np.random.randint(0, d.shape[-1] - self.patch_size[1])
+
+        d = d[:, start_y:start_y + self.patch_size[1], start_x:start_x + self.patch_size[0]]
+
         A = np.expand_dims(d, axis=[0]).astype(np.float32)
         A = self.transform(data=A)
 
         d = self.get_slice_from_contiguous_index(idx, self.dataset, self.B_intervals, self.B_key)[:, 0, :, :]
+
+        d = d[:, start_y:start_y + self.patch_size[1], start_x:start_x + self.patch_size[0]]
+
         B = np.expand_dims(d, axis=[0]).astype(np.float32)
         B = self.transform(data=B)
 
@@ -60,7 +74,6 @@ class BraTSDataset(Dataset):
 
 
 def setup_dataloaders(dataset_h5py, A_key, B_key, batch_size, num_workers, train_transform="cyclegan"):
-
     cases = list(h5py.File(dataset_h5py).keys())
     np.random.shuffle(cases)
     tst_cases = cases[:37]
@@ -94,14 +107,17 @@ def setup_dataloaders(dataset_h5py, A_key, B_key, batch_size, num_workers, train
 if __name__ == "__main__":
     trn_dataloader, val_dataloader, tst_dataloader = setup_dataloaders(
         dataset_h5py="../translation_mbrats_cyclegan.h5",
-        A_key='t1', B_key='t2', batch_size=1, num_workers=os.cpu_count())
+        A_key='t1', B_key='t2', batch_size=1, num_workers=0)
 
     import time
 
     start = time.time()
-    for elem in tqdm(trn_dataloader):
-        if np.random.random() < 0.1:
-            for i in range(elem['A'].shape[2]):
-                plt.imshow(elem['A'][0][0][i], cmap="gray")
-                plt.show()
+    for idx, elem in enumerate(tqdm(tst_dataloader)):
+        for i in range(elem['A'].shape[2]):
+            plt.imshow(elem['A'][0][0][i], cmap="gray")
+            plt.title(f"{idx}")
+            plt.show()
+            plt.imshow(elem['B'][0][0][i], cmap="gray")
+            plt.title(f"{idx}")
+            plt.show()
     print(f"{time.time() - start} seconds")

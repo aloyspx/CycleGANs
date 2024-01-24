@@ -5,7 +5,6 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.loggers import TensorBoardLogger
-from pytorch_lightning.plugins import D
 from pytorch_lightning.strategies import DDPStrategy
 
 from helpers.dataset import setup_dataloaders
@@ -32,7 +31,7 @@ if __name__ == "__main__":
                                                                        A_key=args.source_modality,
                                                                        B_key=args.target_modality,
                                                                        batch_size=1,
-                                                                       num_workers=12)
+                                                                       num_workers=0)
 
     logger = TensorBoardLogger(save_dir=f'logs/{args.source_modality}-{args.target_modality}',
                                name=cyclegan.__class__.__name__)
@@ -48,9 +47,9 @@ if __name__ == "__main__":
     ]
 
     trainer = pl.Trainer(precision=32,
-                         accelerator='gpu',
-                         devices=4,
-                         strategy=DDPStrategy(find_unused_parameters=True, static_graph=True),
+                         accelerator='auto',
+                         # devices=4,
+                         # strategy=DDPStrategy(find_unused_parameters=True, static_graph=True),
                          max_epochs=100,
                          callbacks=callbacks,
                          logger=logger,
