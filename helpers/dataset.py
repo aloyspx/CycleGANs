@@ -99,9 +99,9 @@ if __name__ == "__main__":
     import time
 
     start = time.time()
-    for elem in tqdm(trn_dataloader):
-        if np.random.random() < 0.1:
-            for i in range(elem['A'].shape[2]):
-                plt.imshow(elem['A'][0][0][i], cmap="gray")
-                plt.show()
+    for idx, elem in enumerate(tqdm(tst_dataloader)):
+        for i in range(elem['A'].shape[2]):
+            plt.imshow(elem['A'][0][0][i], cmap="gray")
+            plt.title(f"{idx}")
+            plt.show()
     print(f"{time.time() - start} seconds")
