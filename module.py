@@ -85,8 +85,8 @@ class CycleGAN(L.LightningModule):
         self.log("cyc_BA", cycBA_loss, on_step=True, prog_bar=True)
         self.log("dsc_AB", dscAB_loss, on_step=True, prog_bar=True)
         self.log("dsc_BA", dscBA_loss, on_step=True, prog_bar=True)
-        self.log("seg_A", segA_loss, on_step=True, prog_bar=True)
-        self.log("seg_B", segB_loss, on_step=True, prog_bar=True)
+        self.log("seg_AB_A", segA_loss, on_step=True, prog_bar=True)
+        self.log("seg_AB_B", segB_loss, on_step=True, prog_bar=True)
 
         gen_optimzer.zero_grad()
         self.manual_backward(loss)
@@ -151,8 +151,8 @@ class CycleGAN(L.LightningModule):
         self.mi_B.append(mutual_information(B.flatten().cpu().numpy(), A_hat.flatten().cpu().numpy()))
 
         """ Dice Score """
-        self.dice_A.append(dice_score(A_seg_hat.flatten().cpu().numpy(), A_seg.flatten().cpu().numpy()))
-        self.dice_B.append(dice_score(B_seg_hat.flatten().cpu().numpy(), B_seg.flatten().cpu().numpy()))
+        self.dice_A.append(dice_score(A_seg_hat.long().flatten().cpu().numpy(), A_seg.flatten().cpu().numpy()))
+        self.dice_B.append(dice_score(B_seg_hat.long().flatten().cpu().numpy(), B_seg.flatten().cpu().numpy()))
 
         """Sample logging"""
         if batch_idx % 10 == 0:
