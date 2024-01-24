@@ -156,8 +156,8 @@ class CycleGAN(L.LightningModule):
 
         """Sample logging"""
         if batch_idx % 10 == 0:
-            plt.figure(figsize=(16, 16))
-            fig, axs = plt.subplots(2, 4)
+            plt.figure(figsize=(20, 20))
+            fig, axs = plt.subplots(2, 5)
 
             axs[0, 0].imshow(batch['A'].cpu().numpy()[0][0], cmap="gray")
             axs[0, 0].axis('off')
@@ -171,9 +171,13 @@ class CycleGAN(L.LightningModule):
             axs[0, 2].axis('off')
             axs[0, 2].set_title('B_idt')
 
-            axs[0, 3].imshow(B_seg_hat.cpu().numpy()[0][0], cmap="gray")
+            axs[0, 3].imshow(A_seg.cpu().numpy()[0][0], cmap="gray")
             axs[0, 3].axis('off')
             axs[0, 3].set_title('A_seg')
+
+            axs[0, 4].imshow(A_seg_hat.cpu().numpy()[0][0], cmap="gray")
+            axs[0, 4].axis('off')
+            axs[0, 4].set_title('A_seg_hat')
 
             axs[1, 0].imshow(batch['B'].cpu().numpy()[0][0], cmap="gray")
             axs[1, 0].axis('off')
@@ -187,9 +191,13 @@ class CycleGAN(L.LightningModule):
             axs[1, 2].axis('off')
             axs[1, 2].set_title('A_idt')
 
-            axs[1, 3].imshow(A_seg_hat.cpu().numpy()[0][0], cmap="gray")
+            axs[1, 3].imshow(B_seg.cpu().numpy()[0][0], cmap="gray")
             axs[1, 3].axis('off')
             axs[1, 3].set_title('B_seg')
+
+            axs[1, 4].imshow(B_seg_hat.cpu().numpy()[0][0], cmap="gray")
+            axs[1, 4].axis('off')
+            axs[1, 4].set_title('B_seg_hat')
 
             os.makedirs(f'{self.logger.experiment.log_dir}/samples/', exist_ok=True)
             plt.savefig(f'{self.logger.experiment.log_dir}/samples/fig_{self.current_epoch}_{batch_idx}')
