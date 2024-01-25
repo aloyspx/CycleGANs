@@ -1,11 +1,9 @@
 #!/bin/bash
 
-elements=("t1" "t1ce" "t2" "flair")
+elements=(1 2 5 10)
 
-for SOURCE_MODALITY in "${elements[@]}"; do
-    for TARGET_MODALITY in "${elements[@]}"; do
-        if [ "$SOURCE_MODALITY" != "$TARGET_MODALITY" ]; then
-            sbatch run_experiments.sh $SOURCE_MODALITY $TARGET_MODALITY
-        fi
+for LAMBDA_SEG_A in "${elements[@]}"; do
+    for LAMBDA_SEG_B in "${elements[@]}"; do
+        sbatch run_experiments.sh $LAMBDA_SEG_A $LAMBDA_SEG_B
     done
 done

@@ -15,6 +15,8 @@ def parse_args():
     parser.add_argument("--source_modality", required=True)
     parser.add_argument("--target_modality", required=True)
     parser.add_argument("--data_source", required=True)
+    parser.add_argument("--lambda_segA", required=True, type=int)
+    parser.add_argument("--lambda_segB", required=True, type=int)
     return parser.parse_args()
 
 
@@ -25,7 +27,7 @@ if __name__ == "__main__":
 
     args = parse_args()
 
-    cyclegan = CycleGAN()
+    cyclegan = CycleGAN(args.lambda_segA, args.lambda_segB)
     trn_dataloader, val_dataloader, tst_dataloader = setup_dataloaders(dataset_h5py=args.data_source,
                                                                        A_key=args.source_modality,
                                                                        B_key=args.target_modality,

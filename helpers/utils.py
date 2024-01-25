@@ -51,7 +51,7 @@ def mutual_information(x, y, sigma=0.05, normalized=True):
 
 
 def dice_score(seg, gt):
-    return np.sum(seg[gt == 1]) * 2.0 / (np.sum(seg) + np.sum(gt))
+    return np.sum(seg[gt == 1]) * 2.0 / (np.sum(seg) + np.sum(gt) + 1e-8)
 
 
 class LambdaLR:

@@ -14,8 +14,9 @@ from helpers.utils import mutual_information, LambdaLR, weights_init_normal, dic
 
 
 class CycleGAN(L.LightningModule):
-    def __init__(self):
+    def __init__(self, lambda_segA, lambda_segB):
         super().__init__()
+        self.save_hyperparameters()
         self.automatic_optimization = False
 
         self.generatorBtoA = ResnetGenerator(output_nc=2).apply(weights_init_normal)
@@ -27,7 +28,8 @@ class CycleGAN(L.LightningModule):
         self.lambda_cyc = 10
         self.lambda_idt = 5
         self.lambda_adv = 1
-        self.lambda_seg = 1
+        self.lambda_segA = lambda_segA
+        self.lambda_segB = lambda_segB
 
         self.mi_A = []
         self.mi_B = []
@@ -61,7 +63,8 @@ class CycleGAN(L.LightningModule):
         B_hat, _ = self.generatorAtoB(B).values()
         idtAB_loss = F.l1_loss(B_hat, B)
 
-        AB_loss = self.lambda_cyc * cycAB_loss + self.lambda_adv * dscAB_loss + self.lambda_idt * idtAB_loss + self.lambda_seg * (segA_loss + segB_loss)
+        AB_loss = (self.lambda_cyc * cycAB_loss + self.lambda_adv * dscAB_loss + self.lambda_idt * idtAB_loss
+                   + self.lambda_segA * segA_loss + self.lambda_segB * segB_loss)
 
         """II. Generator from B to A"""
         # i. Cyclic Forward
