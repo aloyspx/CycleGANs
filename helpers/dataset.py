@@ -75,7 +75,7 @@ class BraTSDataset(Dataset):
 
 def setup_dataloaders(dataset_h5py, A_key, B_key, batch_size, num_workers, train_transform="cyclegan"):
 
-    tst_cases = np.load("../test.npy").astype(str)
+    tst_cases = np.load("test.npy").astype(str)
     cases = list(h5py.File(dataset_h5py).keys())
 
     cases = list(set(cases).difference(set(tst_cases)))
