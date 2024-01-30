@@ -78,11 +78,16 @@ class BraTSDataset(Dataset):
 
 
 def setup_dataloaders(dataset_h5py, A_key, B_key, batch_size, num_workers, train_transform="cyclegan"):
+
+    tst_cases = np.load("test.npy").astype(str)
     cases = list(h5py.File(dataset_h5py).keys())
+
+    cases = list(set(cases).difference(set(tst_cases)))
+
     np.random.shuffle(cases)
-    tst_cases = cases[:37]
-    val_cases = cases[37:73]
-    trn_cases = cases[73:]
+
+    val_cases = cases[0:37]
+    trn_cases = cases[37:]
 
     trn_dataset = BraTSDataset(dataset_h5py, A_key, B_key, train_transform, trn_cases)
     trn_dataloader = DataLoader(trn_dataset,
