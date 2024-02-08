@@ -16,6 +16,7 @@ def parse_args():
     parser.add_argument("--source_modality", required=True)
     parser.add_argument("--target_modality", required=True)
     parser.add_argument("--data_source", required=True)
+    parser.add_argument("--lr", default=2e-4, type=float)
     return parser.parse_args()
 
 
@@ -26,12 +27,12 @@ if __name__ == "__main__":
 
     args = parse_args()
 
-    cyclegan = CycleGAN()
+    cyclegan = CycleGAN(args.lr)
     trn_dataloader, val_dataloader, tst_dataloader = setup_dataloaders(dataset_h5py=args.data_source,
                                                                        A_key=args.source_modality,
                                                                        B_key=args.target_modality,
-                                                                       batch_size=1,
-                                                                       num_workers=0)
+                                                                       batch_size=2,
+                                                                       num_workers=16)
 
     logger = TensorBoardLogger(save_dir=f'logs/{args.source_modality}-{args.target_modality}',
                                name=cyclegan.__class__.__name__)
@@ -48,8 +49,8 @@ if __name__ == "__main__":
 
     trainer = pl.Trainer(precision=32,
                          accelerator='auto',
-                         # devices=4,
-                         # strategy=DDPStrategy(find_unused_parameters=True, static_graph=True),
+                         devices=4,
+                         strategy=DDPStrategy(find_unused_parameters=True, static_graph=True),
                          max_epochs=100,
                          callbacks=callbacks,
                          logger=logger,

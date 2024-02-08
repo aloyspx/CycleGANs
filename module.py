@@ -13,8 +13,9 @@ from helpers.utils import mutual_information, LambdaLR, weights_init_normal
 
 
 class CycleGAN(L.LightningModule):
-    def __init__(self):
+    def __init__(self, lr):
         super().__init__()
+        self.save_hyperparameters()
         self.automatic_optimization = False
 
         self.generatorBtoA = ResnetGenerator().apply(weights_init_normal)
@@ -130,11 +131,11 @@ class CycleGAN(L.LightningModule):
         A_idt = self.generatorBtoA(A)
 
         """ MI Calculation """
-        self.mi_A.append(mutual_information(B.flatten().cpu().numpy(), B_hat.flatten().cpu().numpy()))
-        self.mi_B.append(mutual_information(A.flatten().cpu().numpy(), A_hat.flatten().cpu().numpy()))
+        self.mi_A.append(mutual_information(B.flatten().cpu().numpy(), A_hat.flatten().cpu().numpy()))
+        self.mi_B.append(mutual_information(A.flatten().cpu().numpy(), B_hat.flatten().cpu().numpy()))
 
         """Sample logging"""
-        if np.random.random() < 0.1:
+        if batch_idx % 100:
             for i in range(batch['A'].shape[2]):
                 plt.figure(figsize=(16, 16))
                 fig, axs = plt.subplots(2, 3)
@@ -163,8 +164,8 @@ class CycleGAN(L.LightningModule):
                 axs[1, 2].axis('off')
                 axs[1, 2].set_title('A_idt')
 
-                os.makedirs('logs/samples/', exist_ok=True)
-                plt.savefig(f'logs/samples/fig_{self.current_epoch}_{batch_idx}_{i}')
+                os.makedirs(f'{self.logger.experiment.log_dir}/samples/', exist_ok=True)
+                plt.savefig(f'{self.logger.experiment.log_dir}/samples/fig_{self.current_epoch}_{batch_idx}_{i}')
                 plt.close('all')
 
     def on_validation_epoch_end(self):
@@ -180,10 +181,10 @@ class CycleGAN(L.LightningModule):
 
     def configure_optimizers(self):
         gen_parameters = list(self.generatorAtoB.parameters()) + list(self.generatorBtoA.parameters())
-        gen_optimizer = optim.Adam(gen_parameters, lr=2e-4, betas=(0.5, 0.999))
+        gen_optimizer = optim.Adam(gen_parameters, lr=self.hparams.lr, betas=(0.5, 0.999))
 
         dsc_parameters = list(self.discA.parameters()) + list(self.discB.parameters())
-        dsc_optimizer = optim.Adam(dsc_parameters, lr=2e-4, betas=(0.5, 0.999))
+        dsc_optimizer = optim.Adam(dsc_parameters, lr=self.hparams.lr, betas=(0.5, 0.999))
 
         # Scheduler
         gen_scheduler = optim.lr_scheduler.LambdaLR(
